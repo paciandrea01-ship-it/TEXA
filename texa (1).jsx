@@ -45,6 +45,23 @@ const CATEGORIES = [
   "Macchinari",
 ];
 
+/* Cartella colori dell'index in home: una tinta per categoria */
+const CATEGORY_SHADES = {
+  "Filati": { bg: "#0A4733", fg: "#CDE97B" },
+  "Tessuti": { bg: "#22335F", fg: "#C9D8F4" },
+  "Calze & Calzetteria": { bg: "#CEF17B", fg: "#1C4A2B" },
+  "Abbigliamento & Intimo": { bg: "#F6CFD6", fg: "#8A3A4D" },
+  "Stampa & Ricamo": { bg: "#F5CC55", fg: "#5F430E" },
+  "Confezioni & Servizi": { bg: "#CDEDB3", fg: "#265B35" },
+  "Packaging & Display": { bg: "#C4E2F4", fg: "#1D4E75" },
+  "Macchinari": { bg: "#D9CDEE", fg: "#45306E" },
+};
+
+const hexToRgb = (h) => {
+  const n = parseInt(h.slice(1), 16);
+  return (n >> 16) + ", " + ((n >> 8) & 255) + ", " + (n & 255);
+};
+
 /* ---------- Fiere internazionali (stato calcolato sulla data corrente) ---------- */
 const FAIRS = [
   { id: "mu43", name: "Milano Unica 43", city: "Milano", country: "Italia", venue: "Fiera Milano Rho",
@@ -479,6 +496,74 @@ export default function TexaApp() {
   );
 }
 
+/* ---------------- Elementi grafici home ---------------- */
+function Marquee({ reverse = false }) {
+  return (
+    <div className={"marquee" + (reverse ? " rev" : "")} aria-hidden="true">
+      <div className="marquee-track">
+        {[...MARQUEE, ...MARQUEE].map((w, i) => <span key={i}>{w}<em>✦</em></span>)}
+      </div>
+    </div>
+  );
+}
+
+function Spool({ x, y, c, cls }) {
+  return (
+    <g transform={"translate(" + x + " " + y + ")"} className={cls}>
+      <g className="spool-in">
+        <rect x="-5" y="-9" width="46" height="10" rx="4" fill="#EFF0EC" />
+        <rect x="-5" y="71" width="46" height="10" rx="4" fill="#EFF0EC" />
+        <rect x="0" y="0" width="36" height="72" rx="9" fill={c} />
+        {[12, 24, 36, 48, 60].map((yy) => (
+          <line key={yy} x1="4" y1={yy} x2="32" y2={yy} stroke="#fff" strokeWidth="2" opacity=".26" />
+        ))}
+      </g>
+    </g>
+  );
+}
+
+/* Rocche di filo → il filo si tende e intreccia un tessuto (solo decorativo) */
+function HeroArt() {
+  const weftColors = ["#4F84C4", "#B5D054", "#E8A9B8", "#0A4733"];
+  return (
+    <div className="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 560 420" fill="none">
+        {Array.from({ length: 11 }).map((_, i) => (
+          <line key={"w" + i} x1={330 + i * 21} y1="78" x2={330 + i * 21} y2="342" stroke="#E7EAE5" strokeWidth="3" strokeLinecap="round" />
+        ))}
+        {Array.from({ length: 12 }).map((_, i) => (
+          <line key={"t" + i} className="weft-l" style={{ animationDelay: (1.15 + i * 0.14) + "s" }}
+            x1="326" y1={92 + i * 21.5} x2="544" y2={92 + i * 21.5}
+            stroke={weftColors[i % 4]} strokeWidth="7" strokeLinecap="round" opacity="0.9" />
+        ))}
+        <path className="thread t1" d="M98 96 C 190 96, 250 118, 326 113" stroke="#4F84C4" strokeWidth="2.5" />
+        <path className="thread t2" d="M98 218 C 205 218, 255 175, 326 156" stroke="#B5D054" strokeWidth="2.5" />
+        <path className="thread t3" d="M98 338 C 215 338, 265 245, 326 199" stroke="#E8A9B8" strokeWidth="2.5" />
+        <Spool x={62} y={60} c="#4F84C4" cls="sp1" />
+        <Spool x={62} y={182} c="#B5D054" cls="sp2" />
+        <Spool x={62} y={302} c="#E8A9B8" cls="sp3" />
+      </svg>
+    </div>
+  );
+}
+
+/* Metro da sarto (decorativo, in fondo all'hero) */
+function TapeMeasure() {
+  return (
+    <svg className="tape" viewBox="0 0 560 34" aria-hidden="true">
+      <rect x="0.5" y="6.5" width="559" height="23" rx="8" fill="#F5F6F3" stroke="#E2E4DF" />
+      {Array.from({ length: 56 }).map((_, i) => {
+        const x = 10 + i * 9.8;
+        const major = i % 10 === 0;
+        return <line key={i} x1={x} y1="6.5" x2={x} y2={major ? 21 : 14} stroke="#9AA29A" strokeWidth="1" />;
+      })}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <text key={"n" + i} x={13 + i * 98} y="27" fontSize="7.5" fontWeight="600" fill="#8A928A" fontFamily="Inter, sans-serif">{50 + i}</text>
+      ))}
+    </svg>
+  );
+}
+
 /* ---------------- Home ---------------- */
 function Home({ onSearch, onCategory, onFairs }) {
   const [q, setQ] = useState("");
@@ -486,6 +571,7 @@ function Home({ onSearch, onCategory, onFairs }) {
   return (
     <main>
       <section className="hero">
+        <HeroArt />
         <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Textile network & marketplace</p>
         <h1 className="mega">
           <span className="line l1">Search less.</span>
@@ -500,30 +586,33 @@ function Home({ onSearch, onCategory, onFairs }) {
           <button className="hint-link" onClick={() => onSearch("calze sportive")}>calze sportive</button>
           <button className="hint-link" onClick={() => onSearch("recycled GRS")}>recycled GRS</button>
         </p>
+        <TapeMeasure />
       </section>
 
-      <div className="marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {[...MARQUEE, ...MARQUEE].map((w, i) => <span key={i}>{w}<em>✦</em></span>)}
-        </div>
-      </div>
+      <Marquee />
 
       <section className="index">
         <div className="index-head">
           <h2>Index</h2>
           <span className="index-sub">{COMPANIES.length} fornitori verificati</span>
         </div>
-        {CATEGORIES.map((cat) => {
-          const n = COMPANIES.filter((x) => x.category === cat).length;
-          return (
-            <button key={cat} className="row" onClick={() => onCategory(cat)}>
-              <span className="row-name">{cat}</span>
-              <span className="row-dots" aria-hidden="true" />
-              <span className="row-n">{n}</span>
-              <span className="row-arrow" aria-hidden="true">↗</span>
-            </button>
-          );
-        })}
+        <div className="cat-cards">
+          {CATEGORIES.map((cat) => {
+            const n = COMPANIES.filter((x) => x.category === cat).length;
+            const sh = CATEGORY_SHADES[cat] || { bg: "#F2F3F0", fg: "#141414" };
+            return (
+              <button key={cat} className="cat-card" style={{ background: sh.bg, color: sh.fg }} onClick={() => onCategory(cat)}>
+                <span className="cat-name">{cat.toLowerCase()}</span>
+                <span className="cat-specs">
+                  <span>{n} fornitori</span>
+                  <span>RGB: {hexToRgb(sh.bg)}</span>
+                  <span>HEX: {sh.bg}</span>
+                  <span className="cat-arrow">Esplora ↗</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       <section className="fairs">
@@ -547,6 +636,8 @@ function Home({ onSearch, onCategory, onFairs }) {
           })}
         </div>
       </section>
+
+      <Marquee reverse />
     </main>
   );
 }
@@ -1208,15 +1299,36 @@ function Style() {
         font:inherit;font-size:13px;color:var(--ink);padding:6px 14px;transition:all .15s}
       .hint-link:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-soft)}
 
-      /* marquee */
-      .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-        overflow:hidden;padding:12px 0;background:var(--bg)}
+      /* marquee — doppia fascia nera a contrasto */
+      .marquee{overflow:hidden;padding:14px 0;background:var(--ink)}
       .marquee-track{display:flex;gap:0;width:max-content;animation:scroll 32s linear infinite}
+      .marquee.rev .marquee-track{animation-direction:reverse}
       .marquee:hover .marquee-track{animation-play-state:paused}
-      .marquee-track span{font-weight:500;font-size:12.5px;color:var(--muted);
+      .marquee-track span{font-weight:500;font-size:12.5px;color:#DDE0DA;
         letter-spacing:.18em;white-space:nowrap;display:flex;align-items:center}
-      .marquee-track em{font-style:normal;color:var(--green);margin:0 22px;font-size:11px}
+      .marquee-track em{font-style:normal;color:#7CC99B;margin:0 22px;font-size:11px}
       @keyframes scroll{to{transform:translateX(-50%)}}
+
+      /* hero art — rocche, filo e tessuto */
+      .hero{position:relative}
+      .hero .eyebrow,.hero .mega,.hero .searchbar,.hero .hint{position:relative;z-index:1}
+      .hero-art{position:absolute;right:0;top:44px;width:min(40vw,440px);pointer-events:none;z-index:0}
+      .hero-art svg{width:100%;height:auto;display:block}
+      .thread{fill:none;stroke-dasharray:380;stroke-dashoffset:380;
+        animation:draw 1.8s cubic-bezier(.4,0,.2,1) .5s forwards}
+      .thread.t2{animation-delay:.85s}
+      .thread.t3{animation-delay:1.2s}
+      @keyframes draw{to{stroke-dashoffset:0}}
+      .weft-l{transform-box:fill-box;transform-origin:left center;transform:scaleX(0);
+        animation:weaveIn .55s cubic-bezier(.2,.8,.2,1) both}
+      @keyframes weaveIn{to{transform:scaleX(1)}}
+      .spool-in{animation:bob 7s ease-in-out infinite alternate}
+      .sp2 .spool-in{animation-delay:1.4s}
+      .sp3 .spool-in{animation-delay:2.6s}
+      @keyframes bob{to{transform:translateY(7px)}}
+      .tape{position:absolute;left:clamp(20px,5vw,64px);bottom:0;width:min(58%,560px);height:34px;
+        opacity:.55;pointer-events:none;z-index:0;transform:rotate(-1.2deg)}
+      @media(max-width:860px){.hero-art{display:none}}
 
       /* index */
       .index{max-width:1000px;margin:0 auto;padding:64px clamp(20px,5vw,64px) 8px}
@@ -1233,6 +1345,18 @@ function Style() {
       .row-arrow{font-size:18px;color:var(--green);transform:translate(0,0);transition:transform .2s}
       .row:hover{background:var(--card);padding-left:18px;padding-right:18px}
       .row:hover .row-arrow{transform:translate(4px,-4px)}
+
+      /* index → cartella colori multicolore */
+      .cat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:20px}
+      .cat-card{position:relative;border:none;border-radius:18px;padding:26px 24px;min-height:150px;
+        text-align:left;display:flex;flex-direction:column;justify-content:space-between;
+        overflow:hidden;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+      .cat-card:hover{transform:translateY(-4px)}
+      .cat-name{font-size:clamp(22px,2.6vw,29px);font-weight:600;letter-spacing:-.03em;line-height:1.05}
+      .cat-specs{display:flex;flex-direction:column;gap:2px;font-size:11.5px;font-weight:500;
+        letter-spacing:.02em;opacity:.82;font-variant-numeric:tabular-nums}
+      .cat-arrow{margin-top:8px;font-size:12.5px;font-weight:600;letter-spacing:.02em;opacity:1}
+      @media(max-width:560px){.cat-cards{grid-template-columns:1fr}}
 
       /* fairs (home) */
       .fairs{max-width:1000px;margin:0 auto;padding:56px clamp(20px,5vw,64px) 88px}
