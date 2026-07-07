@@ -1,14 +1,17 @@
 import React from "react";
 import { CONSULTANTS } from "../data/consultants.js";
 
-// Sezione Consulenti (Index): advisor della piattaforma
-export function Consultants() {
+// Pagina Consulenti — elenco degli advisor (raggiunta dal 9° quadrante
+// dell'Index o cercando "consulenti").
+export function ConsultantsPage() {
   return (
-    <section className="consult">
-      <div className="index-head">
-        <h2>Consulenti</h2>
-        <span className="index-sub">Advisor TEXA per il tuo progetto</span>
-      </div>
+    <main className="pg">
+      <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Consulenti</p>
+      <h1 className="page-h1">Gli advisor <span className="accent">al tuo fianco.</span></h1>
+      <p className="lead">
+        Esperti TEXA che affiancano brand e uffici stile: sostenibilità e certificazioni,
+        sviluppo prodotto, sourcing e colore. Scrivi a chi ti serve per il tuo progetto.
+      </p>
       <div className="consult-row">
         {CONSULTANTS.map((c) => {
           const initials = c.name.split(" ").map((w) => w[0]).join("").toUpperCase();
@@ -23,6 +26,6 @@ export function Consultants() {
           );
         })}
       </div>
-    </section>
+    </main>
   );
 }

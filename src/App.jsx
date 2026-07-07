@@ -5,6 +5,7 @@ import { searchCompanies, interpretQuery } from "./lib/search.js";
 import { Header } from "./components/Header.jsx";
 import { Home } from "./components/Home.jsx";
 import { SearchPage } from "./components/SearchPage.jsx";
+import { ConsultantsPage } from "./components/ConsultantsPage.jsx";
 import { FairsPage } from "./components/FairsPage.jsx";
 import { MessagesPage } from "./components/MessagesPage.jsx";
 import { Results } from "./components/Results.jsx";
@@ -33,7 +34,10 @@ export default function App() {
 
   useEffect(() => { window.scrollTo(0, 0); }, [view, selectedId]);
 
-  const goSearch = (q, cat = null) => { setQuery(q || ""); setInput(q || ""); setActiveCategory(cat); setView("results"); };
+  const goSearch = (q, cat = null) => {
+    if (q && /consulen/i.test(q)) { setView("consultants"); return; }
+    setQuery(q || ""); setInput(q || ""); setActiveCategory(cat); setView("results");
+  };
   const goHome = () => { setView("home"); setActiveCategory(null); setQuery(""); setInput(""); };
   const openCompany = (id) => { setPrevView(view === "company" ? prevView : view); setSelectedId(id); setView("company"); setRfqSent(false); setContactOpen(false); };
   const submitRfq = (form) => {
@@ -58,8 +62,9 @@ export default function App() {
     <div className="texa">
       <Header view={view} onNav={nav} onHome={goHome} rfqCount={rfqs.length} />
 
-      {view === "home" && <Home onSearch={goSearch} onCategory={(c) => goSearch("", c)} onFairs={() => nav("fairs")} />}
+      {view === "home" && <Home onSearch={goSearch} onCategory={(c) => goSearch("", c)} onFairs={() => nav("fairs")} onConsultants={() => nav("consultants")} />}
       {view === "search" && <SearchPage onSearch={goSearch} onCategory={(c) => goSearch("", c)} />}
+      {view === "consultants" && <ConsultantsPage />}
       {view === "fairs" && <FairsPage selected={selectedFair} setSelected={setSelectedFair} />}
       {view === "messages" && (
         <MessagesPage threads={threads} activeId={activeThread} setActiveId={setActiveThread}

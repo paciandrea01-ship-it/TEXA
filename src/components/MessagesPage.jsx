@@ -27,7 +27,6 @@ export function MessagesPage({ threads, activeId, setActiveId, onSend, onStart, 
 
   return (
     <main className="pg">
-      <WavyTape className="tape-page" />
       <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Messaggi</p>
       <h1 className="page-h1">Filo diretto <span className="accent">coi fornitori.</span></h1>
 

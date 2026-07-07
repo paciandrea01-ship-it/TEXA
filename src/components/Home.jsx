@@ -1,16 +1,26 @@
 import React, { useState, useMemo } from "react";
 import { COMPANIES } from "../data/companies.js";
-import { CATEGORIES, CATEGORY_SHADES, hexToRgb } from "../data/catalog.js";
+import { CATEGORIES, INDEX_SCALE, hexToRgb } from "../data/catalog.js";
+import { CONSULTANTS } from "../data/consultants.js";
 import { FAIRS, fairStatus, sortFairs, fmtRange } from "../data/fairs.js";
 import { Marquee } from "./Marquee.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
-import { Consultants } from "./Consultants.jsx";
 import { Badge } from "./ui/Badge.jsx";
 
 // Pagina iniziale (Index)
-export function Home({ onSearch, onCategory, onFairs }) {
+export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
   const [q, setQ] = useState("");
   const nextFairs = useMemo(() => sortFairs(FAIRS).filter((f) => fairStatus(f).key !== "done").slice(0, 3), []);
+
+  // 9 quadranti = 8 categorie + Consulenti, colorati come scala colori
+  const tiles = [
+    ...CATEGORIES.map((cat) => ({
+      key: cat, label: cat, n: COMPANIES.filter((x) => x.category === cat).length,
+      unit: "fornitori", cta: "Esplora ↗", onClick: () => onCategory(cat),
+    })),
+    { key: "consulenti", label: "consulenti", n: CONSULTANTS.length, unit: "consulenti", cta: "Elenco ↗", onClick: onConsultants },
+  ];
+
   return (
     <main>
       <Marquee />
@@ -36,28 +46,25 @@ export function Home({ onSearch, onCategory, onFairs }) {
         <FruitBackground />
         <div className="index-head">
           <h2>Index</h2>
-          <span className="index-sub">{COMPANIES.length} fornitori verificati</span>
+          <span className="index-sub">{COMPANIES.length} fornitori · {CONSULTANTS.length} consulenti</span>
         </div>
         <div className="cat-cards">
-          {CATEGORIES.map((cat) => {
-            const n = COMPANIES.filter((x) => x.category === cat).length;
-            const sh = CATEGORY_SHADES[cat] || { bg: "#F2F3F0", fg: "#141414" };
+          {tiles.map((t, i) => {
+            const sh = INDEX_SCALE[i] || { bg: "#F2F3F0", fg: "#141414" };
             return (
-              <button key={cat} className="cat-card" style={{ background: sh.bg, color: sh.fg }} onClick={() => onCategory(cat)}>
-                <span className="cat-name">{cat.toLowerCase()}</span>
+              <button key={t.key} className="cat-card" style={{ background: sh.bg, color: sh.fg }} onClick={t.onClick}>
+                <span className="cat-name">{t.label.toLowerCase()}</span>
                 <span className="cat-specs">
-                  <span>{n} fornitori</span>
+                  <span>{t.n} {t.unit}</span>
                   <span>RGB: {hexToRgb(sh.bg)}</span>
                   <span>HEX: {sh.bg}</span>
-                  <span className="cat-arrow">Esplora ↗</span>
+                  <span className="cat-arrow">{t.cta}</span>
                 </span>
               </button>
             );
           })}
         </div>
       </section>
-
-      <Consultants />
 
       <section className="fairs">
         <div className="index-head">

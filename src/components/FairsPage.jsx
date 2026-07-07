@@ -7,7 +7,6 @@ export function FairsPage({ selected, setSelected }) {
   const fairs = useMemo(() => sortFairs(FAIRS, now), []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <main className="pg">
-      <WavyTape className="tape-page" />
       <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Fiere internazionali</p>
       <h1 className="page-h1">Il calendario del tessile,<br /><span className="accent">sempre aggiornato.</span></h1>
       <p className="lead">

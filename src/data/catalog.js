@@ -1,4 +1,19 @@
 // Categorie, palette dell'index, etichette certificazioni, marquee
+
+// Scala colori dell'Index (9 quadranti): sinistra→destra, riga per riga
+// verdi · blu/azzurri · viola/lilla/rosa
+export const INDEX_SCALE = [
+  { bg: "#0A4733", fg: "#CDE97B" }, // verde scuro
+  { bg: "#0E7A4E", fg: "#EAF7EE" }, // verde
+  { bg: "#CEF17B", fg: "#1C4A2B" }, // verde chiaro
+  { bg: "#22335F", fg: "#C9D8F4" }, // blu
+  { bg: "#3E6FB0", fg: "#EAF2FC" }, // blu chiaro
+  { bg: "#9BD4D8", fg: "#12484B" }, // azzurro
+  { bg: "#6C3FB4", fg: "#EDE4FA" }, // viola
+  { bg: "#B9A6C9", fg: "#3A2A52" }, // lilla
+  { bg: "#F6CFD6", fg: "#8A3A4D" }, // rosa
+];
+
 export const CATEGORIES = [
   "Filati",
   "Tessuti",
