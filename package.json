@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "esbuild src/main.jsx --bundle --outfile=public/app.bundle.js --loader:.jsx=jsx --loader:.css=css --servedir=public --watch",
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "enrich": "node scripts/enrich.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.23.0"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }
