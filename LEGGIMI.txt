@@ -1,0 +1,29 @@
+TEXA — Textile Network & Marketplace
+====================================
+
+Contenuto della cartella
+------------------------
+1. index.html + app.bundle.js
+   Versione pronta all'uso: apri index.html con doppio click
+   in un browser (Chrome, Safari, Edge...) e l'app funziona
+   subito, senza installare nulla.
+   Serve la connessione internet per i font (Inter / Playfair
+   Display) e per la mappa (Leaflet + OpenStreetMap); senza
+   rete l'app funziona comunque con font di sistema e mappa
+   SVG di riserva.
+
+2. texa.jsx
+   Il codice sorgente React (un unico componente).
+   Da usare in un progetto React/Vite/Next, oppure incollandolo
+   in un artifact. Export di default: <TexaApp />.
+
+Sezioni dell'app
+----------------
+- Ricerca: ricerca interpretata sui 73 fornitori + Trend Colori
+  della stagione corrente (si aggiorna in automatico con la data)
+- Fiere: calendario internazionale con stato live
+  (in corso / prossima / conclusa) e prenotazione ingresso
+  tramite i siti di registrazione ufficiali
+- Messaggi: chat coi fornitori, profilo, certificazioni e
+  documenti scaricabili (demo)
+- Ogni azienda ha la sua cartella colori in stile Pantone
