@@ -378,12 +378,12 @@ function searchCompanies(query, activeCategory) {
 
 /* ---------- Mock products from real tags ---------- */
 const SWATCHES = [
-  "linear-gradient(135deg,#F4F5F2,#E1E3DE)",
-  "linear-gradient(135deg,#EEF2EF,#CBD6CD)",
-  "linear-gradient(135deg,#F6F6F4,#DDE2DC)",
-  "linear-gradient(135deg,#EBF1ED,#BFD0C4)",
-  "linear-gradient(135deg,#F2F3F0,#D6DAD3)",
-  "linear-gradient(135deg,#E8EEE9,#AFC4B6)",
+  "linear-gradient(135deg,#5B93D6,#2C5F9E)",
+  "linear-gradient(135deg,#D6F26B,#8FB93B)",
+  "linear-gradient(135deg,#F7A8C0,#E8708F)",
+  "linear-gradient(135deg,#FBD34D,#E39A0B)",
+  "linear-gradient(135deg,#46C7AE,#127C68)",
+  "linear-gradient(135deg,#B98CE6,#7D4FC0)",
 ];
 function mockProducts(c) {
   return c.tags.slice(0, 4).map((t, i) => ({
@@ -507,59 +507,118 @@ function Marquee({ reverse = false }) {
   );
 }
 
-function Spool({ x, y, c, cls }) {
+/* ------------------------------------------------------------------
+   ROCCHE DI FILO
+   Per usare FOTOGRAFIE REALI: incolla 3 immagini (URL o data-URI) in
+   SPOOL_PHOTOS, nell'ordine blu / lime / rosa. Se l'array è pieno, la
+   home mostra le foto al posto del rendering vettoriale sottostante.
+   ------------------------------------------------------------------ */
+const SPOOL_PHOTOS = [];
+
+const SPOOL_COLORS = [
+  { gid: "gSpoolBlue", base: "#4F84C4", dark: "#2C5F9E", light: "#AFCBEA" },
+  { gid: "gSpoolLime", base: "#B5D054", dark: "#86A62F", light: "#E3F0A8" },
+  { gid: "gSpoolPink", base: "#E8A9B8", dark: "#C9788D", light: "#F8D8E0" },
+];
+
+/* fili avvolti sul cono, seguono la curvatura */
+function windLines(dark, light) {
+  const out = [];
+  for (let y = 12; y <= 136; y += 4.2) {
+    const t = (y - 6) / 134;
+    const lx = 27 - 23 * t;
+    const rx = 43 + 23 * t;
+    const hi = Math.round(y / 4.2) % 3 === 0;
+    out.push(
+      <path key={y} d={"M" + lx.toFixed(1) + " " + y.toFixed(1) + " Q35 " + (y + 3).toFixed(1) + " " + rx.toFixed(1) + " " + y.toFixed(1)}
+        stroke={hi ? light : dark} strokeWidth={hi ? 0.9 : 0.7} fill="none" opacity={hi ? 0.5 : 0.3} />
+    );
+  }
+  return out;
+}
+
+/* Cono di filo con materiali e luce (rendering realistico) */
+function RealSpool({ col, x, y, s, cls, delay }) {
   return (
-    <g transform={"translate(" + x + " " + y + ")"} className={cls}>
-      <g className="spool-in">
-        <rect x="-5" y="-9" width="46" height="10" rx="4" fill="#EFF0EC" />
-        <rect x="-5" y="71" width="46" height="10" rx="4" fill="#EFF0EC" />
-        <rect x="0" y="0" width="36" height="72" rx="9" fill={c} />
-        {[12, 24, 36, 48, 60].map((yy) => (
-          <line key={yy} x1="4" y1={yy} x2="32" y2={yy} stroke="#fff" strokeWidth="2" opacity=".26" />
-        ))}
+    <g transform={"translate(" + x + " " + y + ") scale(" + s + ")"} className={cls}>
+      <ellipse cx="35" cy="154" rx="30" ry="7" fill="#0d0d0d" opacity="0.13" />
+      <g className="sp-bob" style={{ animationDelay: delay }}>
+        <path d="M27 6 L4 140 Q35 152 66 140 L43 6 Q35 2 27 6 Z" fill={"url(#" + col.gid + ")"} />
+        {windLines(col.dark, col.light)}
+        <ellipse cx="26" cy="46" rx="10" ry="40" fill="#fff" opacity="0.18" />
+        <path d="M27 6 Q35 2 43 6 Q35 11 27 6 Z" fill={col.dark} opacity="0.55" />
+        <path d="M4 140 Q35 152 66 140" stroke={col.dark} strokeWidth="2" fill="none" opacity="0.5" />
       </g>
     </g>
   );
 }
 
-/* Rocche di filo → il filo si tende e intreccia un tessuto (solo decorativo) */
+/* Rocche di filo → il filo si tende e intreccia un tessuto (decorativo) */
 function HeroArt() {
   const weftColors = ["#4F84C4", "#B5D054", "#E8A9B8", "#0A4733"];
+  const usePhotos = SPOOL_PHOTOS.length >= 3;
+  const pos = [{ x: 36, y: 4, s: 0.8 }, { x: 4, y: 150, s: 0.86 }, { x: 52, y: 300, s: 0.76 }];
   return (
     <div className="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 560 420" fill="none">
+      <svg viewBox="0 0 560 470" fill="none">
+        <defs>
+          {SPOOL_COLORS.map((c) => (
+            <linearGradient key={c.gid} id={c.gid} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor={c.light} />
+              <stop offset="0.42" stopColor={c.base} />
+              <stop offset="1" stopColor={c.dark} />
+            </linearGradient>
+          ))}
+          {pos.map((p, i) => (
+            <clipPath key={i} id={"clipSp" + i}>
+              <rect x={p.x} y={p.y} width={70 * p.s} height={150 * p.s} rx="16" />
+            </clipPath>
+          ))}
+        </defs>
+
         {Array.from({ length: 11 }).map((_, i) => (
-          <line key={"w" + i} x1={330 + i * 21} y1="78" x2={330 + i * 21} y2="342" stroke="#E7EAE5" strokeWidth="3" strokeLinecap="round" />
+          <line key={"w" + i} x1={330 + i * 21} y1="92" x2={330 + i * 21} y2="356" stroke="#E7EAE5" strokeWidth="3" strokeLinecap="round" />
         ))}
         {Array.from({ length: 12 }).map((_, i) => (
           <line key={"t" + i} className="weft-l" style={{ animationDelay: (1.15 + i * 0.14) + "s" }}
-            x1="326" y1={92 + i * 21.5} x2="544" y2={92 + i * 21.5}
+            x1="326" y1={106 + i * 21.5} x2="544" y2={106 + i * 21.5}
             stroke={weftColors[i % 4]} strokeWidth="7" strokeLinecap="round" opacity="0.9" />
         ))}
-        <path className="thread t1" d="M98 96 C 190 96, 250 118, 326 113" stroke="#4F84C4" strokeWidth="2.5" />
-        <path className="thread t2" d="M98 218 C 205 218, 255 175, 326 156" stroke="#B5D054" strokeWidth="2.5" />
-        <path className="thread t3" d="M98 338 C 215 338, 265 245, 326 199" stroke="#E8A9B8" strokeWidth="2.5" />
-        <Spool x={62} y={60} c="#4F84C4" cls="sp1" />
-        <Spool x={62} y={182} c="#B5D054" cls="sp2" />
-        <Spool x={62} y={302} c="#E8A9B8" cls="sp3" />
+
+        <path className="thread t1" d="M64 12 C 170 30, 250 100, 326 122" stroke="#4F84C4" strokeWidth="2.5" />
+        <path className="thread t2" d="M36 158 C 170 165, 255 165, 326 168" stroke="#B5D054" strokeWidth="2.5" />
+        <path className="thread t3" d="M77 308 C 200 300, 270 250, 326 212" stroke="#E8A9B8" strokeWidth="2.5" />
+
+        {usePhotos
+          ? pos.map((p, i) => (
+              <image key={i} className={"sp-img sp" + (i + 1)} href={SPOOL_PHOTOS[i]} xlinkHref={SPOOL_PHOTOS[i]}
+                x={p.x} y={p.y} width={70 * p.s} height={150 * p.s} preserveAspectRatio="xMidYMid slice" clipPath={"url(#clipSp" + i + ")"} />
+            ))
+          : pos.map((p, i) => (
+              <RealSpool key={i} col={SPOOL_COLORS[i]} x={p.x} y={p.y} s={p.s} cls={"sp" + (i + 1)} delay={i * 1.3 + "s"} />
+            ))}
       </svg>
     </div>
   );
 }
 
-/* Metro da sarto (decorativo, in fondo all'hero) */
-function TapeMeasure() {
+/* Metro da sarta giallo, ondulato — attraversa la pagina (decorativo) */
+function WavyTape({ className = "" }) {
+  const W = 1200, cy = 60, A = 26, k = (2 * Math.PI) / 300;
+  const wave = (x) => cy + A * Math.sin(k * x);
+  let d = "M0 " + wave(0).toFixed(1);
+  for (let x = 12; x <= W; x += 12) d += " L" + x + " " + wave(x).toFixed(1);
+  const ticks = [], nums = [];
+  for (let i = 0, x = 16; x <= W - 8; x += 13, i++) {
+    const y = wave(x), major = i % 5 === 0;
+    ticks.push(<line key={x} x1={x} y1={(y - 14).toFixed(1)} x2={x} y2={(y - 14 + (major ? 12 : 7)).toFixed(1)} stroke="#9A7500" strokeWidth="1.3" opacity="0.75" />);
+  }
+  for (let i = 0; i < 9; i++) { const x = 34 + i * 140, y = wave(x); nums.push(<text key={i} x={x} y={(y + 3).toFixed(1)} fontSize="12" fontWeight="700" fill="#7A5C00" fontFamily="Inter,sans-serif" opacity="0.8">{60 + i * 5}</text>); }
   return (
-    <svg className="tape" viewBox="0 0 560 34" aria-hidden="true">
-      <rect x="0.5" y="6.5" width="559" height="23" rx="8" fill="#F5F6F3" stroke="#E2E4DF" />
-      {Array.from({ length: 56 }).map((_, i) => {
-        const x = 10 + i * 9.8;
-        const major = i % 10 === 0;
-        return <line key={i} x1={x} y1="6.5" x2={x} y2={major ? 21 : 14} stroke="#9AA29A" strokeWidth="1" />;
-      })}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <text key={"n" + i} x={13 + i * 98} y="27" fontSize="7.5" fontWeight="600" fill="#8A928A" fontFamily="Inter, sans-serif">{50 + i}</text>
-      ))}
+    <svg className={"tape " + className} viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+      <path d={d} stroke="#F5C518" strokeWidth="30" fill="none" strokeLinecap="round" />
+      <path d={d} stroke="#FFDE5C" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.55" transform="translate(0 -7)" />
+      {ticks}{nums}
     </svg>
   );
 }
@@ -570,6 +629,9 @@ function Home({ onSearch, onCategory, onFairs }) {
   const nextFairs = useMemo(() => sortFairs(FAIRS).filter((f) => fairStatus(f).key !== "done").slice(0, 3), []);
   return (
     <main>
+      <Marquee />
+      <div className="led" aria-hidden="true" />
+
       <section className="hero">
         <HeroArt />
         <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Textile network & marketplace</p>
@@ -586,10 +648,8 @@ function Home({ onSearch, onCategory, onFairs }) {
           <button className="hint-link" onClick={() => onSearch("calze sportive")}>calze sportive</button>
           <button className="hint-link" onClick={() => onSearch("recycled GRS")}>recycled GRS</button>
         </p>
-        <TapeMeasure />
+        <WavyTape className="tape-hero" />
       </section>
-
-      <Marquee />
 
       <section className="index">
         <div className="index-head">
@@ -807,7 +867,6 @@ function FallbackMap({ companies, hoveredId, setHoveredId, onOpen }) {
 /* ---------------- Company page ---------------- */
 function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setContactOpen, rfqSent }) {
   const products = mockProducts(c);
-  const shades = companyShades(c);
   const initials = c.name.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   return (
     <main className="co">
@@ -845,12 +904,6 @@ function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setContactOpen,
         <h2>Specializzazione</h2>
         <p className="co-desc">{c.description}</p>
         <div className="tagrow">{c.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
-      </section>
-
-      <section className="co-sec">
-        <h2>Cartella colori</h2>
-        <p className="co-desc">L'identità cromatica del fornitore: le tonalità trattate, con il riferimento Pantone più vicino.</p>
-        <div className="shade-row">{shades.map((s) => <ShadeChip key={s.n} s={s} />)}</div>
       </section>
 
       {c.certifications.length > 0 && (
@@ -919,12 +972,11 @@ function PaletteDots({ c, n = 5 }) {
   );
 }
 
-function ShadeChip({ s }) {
+/* Quadrati colorati decorativi accanto all'azienda */
+function PaletteSquares({ c }) {
   return (
-    <div className="shade">
-      <div className="shade-sw" style={{ background: s.h }} />
-      <span className="shade-n">{s.n}</span>
-      <span className="shade-p">{s.p} TCX</span>
+    <div className="sq-row" aria-hidden="true">
+      {companyShades(c).map((s) => <span key={s.n} style={{ background: s.h }} />)}
     </div>
   );
 }
@@ -944,6 +996,7 @@ function SearchPage({ onSearch, onCategory }) {
   const trends = useTrends();
   return (
     <main className="pg">
+      <WavyTape className="tape-page" />
       <section className="pg-hero">
         <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Ricerca</p>
         <h1 className="page-h1">Trova il fornitore giusto,<br /><span className="accent">in poche parole.</span></h1>
@@ -1011,6 +1064,7 @@ function FairsPage({ selected, setSelected }) {
   const fairs = useMemo(() => sortFairs(FAIRS, now), []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <main className="pg">
+      <WavyTape className="tape-page" />
       <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Fiere internazionali</p>
       <h1 className="page-h1">Il calendario del tessile,<br /><span className="accent">sempre aggiornato.</span></h1>
       <p className="lead">
@@ -1120,6 +1174,7 @@ function MessagesPage({ threads, activeId, setActiveId, onSend, onStart, onOpenC
 
   return (
     <main className="pg">
+      <WavyTape className="tape-page" />
       <p className="eyebrow"><span className="tick" aria-hidden="true">✦</span> Messaggi</p>
       <h1 className="page-h1">Filo diretto <span className="accent">coi fornitori.</span></h1>
 
@@ -1196,7 +1251,7 @@ function MessagesPage({ threads, activeId, setActiveId, onSend, onStart, onOpenC
                   {company.website && <p><span className="k">Sito</span><a href={company.website} target="_blank" rel="noreferrer">{company.website.replace(/^https?:\/\//, "")}</a></p>}
                   {company.emails[0] && <p><span className="k">Email</span><a href={"mailto:" + company.emails[0]}>{company.emails[0]}</a></p>}
                 </div>
-                <div className="shade-row">{companyShades(company).map((s) => <ShadeChip key={s.n} s={s} />)}</div>
+                <PaletteSquares c={company} />
                 <button className="btn" onClick={() => onOpenCompany(company.id)}>Scheda completa →</button>
               </div>
             )}
@@ -1299,7 +1354,7 @@ function Style() {
         font:inherit;font-size:13px;color:var(--ink);padding:6px 14px;transition:all .15s}
       .hint-link:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-soft)}
 
-      /* marquee — doppia fascia nera a contrasto */
+      /* marquee — fasce nere a contrasto (sopra hero + fondo home) */
       .marquee{overflow:hidden;padding:14px 0;background:var(--ink)}
       .marquee-track{display:flex;gap:0;width:max-content;animation:scroll 32s linear infinite}
       .marquee.rev .marquee-track{animation-direction:reverse}
@@ -1309,10 +1364,17 @@ function Style() {
       .marquee-track em{font-style:normal;color:#7CC99B;margin:0 22px;font-size:11px}
       @keyframes scroll{to{transform:translateX(-50%)}}
 
-      /* hero art — rocche, filo e tessuto */
+      /* LED bianco morbido sotto la fascia nera */
+      .led{position:relative;height:78px;pointer-events:none;
+        background:linear-gradient(180deg,rgba(20,20,20,.16),rgba(20,20,20,0) 62%)}
+      .led::before{content:"";position:absolute;top:0;left:6%;right:6%;height:2.5px;border-radius:3px;
+        background:#fff;box-shadow:0 0 16px 5px rgba(255,255,255,.95),0 0 44px 16px rgba(255,255,255,.85),
+        0 14px 40px 6px rgba(255,255,255,.6)}
+
+      /* hero art — rocche di filo, filo teso e tessuto */
       .hero{position:relative}
       .hero .eyebrow,.hero .mega,.hero .searchbar,.hero .hint{position:relative;z-index:1}
-      .hero-art{position:absolute;right:0;top:44px;width:min(40vw,440px);pointer-events:none;z-index:0}
+      .hero-art{position:absolute;right:0;top:30px;width:min(40vw,440px);pointer-events:none;z-index:0}
       .hero-art svg{width:100%;height:auto;display:block}
       .thread{fill:none;stroke-dasharray:380;stroke-dashoffset:380;
         animation:draw 1.8s cubic-bezier(.4,0,.2,1) .5s forwards}
@@ -1322,13 +1384,17 @@ function Style() {
       .weft-l{transform-box:fill-box;transform-origin:left center;transform:scaleX(0);
         animation:weaveIn .55s cubic-bezier(.2,.8,.2,1) both}
       @keyframes weaveIn{to{transform:scaleX(1)}}
-      .spool-in{animation:bob 7s ease-in-out infinite alternate}
-      .sp2 .spool-in{animation-delay:1.4s}
-      .sp3 .spool-in{animation-delay:2.6s}
-      @keyframes bob{to{transform:translateY(7px)}}
-      .tape{position:absolute;left:clamp(20px,5vw,64px);bottom:0;width:min(58%,560px);height:34px;
-        opacity:.55;pointer-events:none;z-index:0;transform:rotate(-1.2deg)}
-      @media(max-width:860px){.hero-art{display:none}}
+      .sp-bob{transform-box:fill-box;transform-origin:center bottom;
+        animation:bob 7s ease-in-out infinite alternate}
+      @keyframes bob{to{transform:translateY(6px)}}
+
+      /* metro da sarta giallo ondulato */
+      .tape{display:block}
+      .tape-hero{position:absolute;left:0;right:0;bottom:-34px;width:100%;height:118px;
+        z-index:0;opacity:.92;pointer-events:none}
+      .tape-page{position:absolute;left:0;right:0;top:34%;width:100%;height:110px;
+        z-index:0;opacity:.32;pointer-events:none}
+      @media(max-width:860px){.hero-art{display:none}.tape-hero{bottom:-26px;opacity:.8}}
 
       /* index */
       .index{max-width:1000px;margin:0 auto;padding:64px clamp(20px,5vw,64px) 8px}
@@ -1489,7 +1555,9 @@ function Style() {
         padding:18px clamp(20px,5vw,64px) 22px;font-size:12.5px;border-top:1px solid var(--line)}
 
       /* pagine sezione */
-      .pg{padding:56px clamp(20px,5vw,64px) 96px;max-width:1000px;margin:0 auto}
+      .pg{padding:56px clamp(20px,5vw,64px) 96px;max-width:1000px;margin:0 auto;position:relative;overflow:hidden}
+      .pg>*{position:relative;z-index:1}
+      .pg>.tape-page{position:absolute;z-index:0}
       .page-h1{font-size:clamp(30px,4.8vw,52px);font-weight:600;letter-spacing:-.03em;
         line-height:1.08;margin-bottom:18px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
       .lead{max-width:620px;font-size:15.5px;color:var(--muted);margin-bottom:30px;animation:rise .6s .08s both}
@@ -1498,16 +1566,13 @@ function Style() {
       .see-all{background:none;border:none;font-size:13px;font-weight:500;color:var(--green);padding:0}
       .see-all:hover{text-decoration:underline}
 
-      /* palette azienda */
+      /* palette azienda — quadrati colorati decorativi */
       .pal{display:inline-flex;gap:3px;align-items:center;flex:none}
       .pal i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(20,20,20,.1)}
-      .co-name .pal i{width:14px;height:14px;border-radius:4px}
-      .shade-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:12px;margin-top:16px;width:100%}
-      .shade{background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 8px 10px;
-        display:flex;flex-direction:column;gap:2px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
-      .shade-sw{height:64px;border-radius:6px;margin-bottom:6px;border:1px solid rgba(20,20,20,.06)}
-      .shade-n{font-size:12px;font-weight:600;letter-spacing:-.01em}
-      .shade-p{font-size:10px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+      .co-name .pal i{width:15px;height:15px;border-radius:4px}
+      .sq-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+      .sq-row span{width:34px;height:34px;border-radius:9px;border:1px solid rgba(20,20,20,.08);
+        box-shadow:0 1px 2px rgba(20,20,20,.05)}
 
       /* badge stato fiera */
       .badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;
