@@ -58,11 +58,14 @@ export function CompaniesProvider({ children }) {
     let dead = false;
     supabase.from(COMPANIES_TABLE).select("*").then(({ data, error }) => {
       if (dead) return;
-      if (error) {
-        setState({ companies: FALLBACK, loading: false, error: error.message, source: "local" });
+      // Se Supabase risponde con errore o con tabella vuota, resta il
+      // fallback locale (il sito funziona comunque). Quando la tabella
+      // avrà i dati, questi prendono automaticamente il sopravvento.
+      if (error || !data || data.length === 0) {
+        setState({ companies: FALLBACK, loading: false, error: error ? error.message : null, source: "local" });
         return;
       }
-      setState({ companies: (data || []).map(mapRow), loading: false, error: null, source: "supabase" });
+      setState({ companies: data.map(mapRow), loading: false, error: null, source: "supabase" });
     });
     return () => { dead = true; };
   }, []);
