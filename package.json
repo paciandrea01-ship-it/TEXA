@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "esbuild src/main.jsx --bundle --outfile=public/app.bundle.js --loader:.jsx=jsx --loader:.css=css --servedir=public --watch",
     "build": "node build.mjs",
-    "enrich": "node scripts/enrich.mjs"
+    "enrich": "node scripts/enrich.mjs",
+    "import:supabase": "node scripts/importToSupabase.mjs"
   },
   "devDependencies": {
-    "esbuild": "^0.23.0"
+    "esbuild": "^0.23.0",
+    "xlsx": "^0.18.5"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

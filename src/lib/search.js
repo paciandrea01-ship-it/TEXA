@@ -1,5 +1,3 @@
-import { COMPANIES } from "../data/companies.js";
-
 // Interprete query (MVP keyword matching, firma AI-ready)
 export const MATERIAL_HINTS = ["lino", "linen", "canapa", "hemp", "cotone", "cotton", "lana", "wool", "seta", "silk", "cashmere", "mohair", "alpaca", "viscosa", "nylon", "poliestere", "polipropilene", "riciclat", "recycled", "econyl", "dryarn", "lyocell", "bamboo", "grafene", "merino"];
 
@@ -25,10 +23,10 @@ export function interpretQuery(q) {
   return { category, materials, keywords };
 }
 
-export function searchCompanies(query, activeCategory) {
+export function searchCompanies(companies, query, activeCategory) {
   const intent = query ? interpretQuery(query) : { category: null, materials: [], keywords: [] };
   const cat = activeCategory || intent.category;
-  return COMPANIES.filter((c) => {
+  return (companies || []).filter((c) => {
     if (cat && c.category !== cat) return false;
     if (!query) return true;
     const hay = (c.name + " " + c.speciality + " " + c.description + " " + c.tags.join(" ") + " " + c.city + " " + c.certifications.join(" ")).toLowerCase();

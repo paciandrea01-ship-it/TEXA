@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { COMPANIES } from "./data/companies.js";
 import { SEED_THREADS, autoReply } from "./data/threads.js";
 import { searchCompanies, interpretQuery } from "./lib/search.js";
+import { useCompanies } from "./state/companies.jsx";
 import { Header } from "./components/Header.jsx";
 import { Home } from "./components/Home.jsx";
 import { SearchPage } from "./components/SearchPage.jsx";
@@ -25,11 +25,12 @@ export default function App() {
   const [rfqs, setRfqs] = useState([]);
   const [rfqSent, setRfqSent] = useState(false);
   const [threads, setThreads] = useState(SEED_THREADS);
-  const [activeThread, setActiveThread] = useState(SEED_THREADS[0].companyId);
+  const [activeThread, setActiveThread] = useState(SEED_THREADS[0]?.companyId || null);
   const [selectedFair, setSelectedFair] = useState(null);
 
-  const results = useMemo(() => searchCompanies(query, activeCategory), [query, activeCategory]);
-  const company = useMemo(() => COMPANIES.find((c) => c.id === selectedId) || null, [selectedId]);
+  const companies = useCompanies();
+  const results = useMemo(() => searchCompanies(companies, query, activeCategory), [companies, query, activeCategory]);
+  const company = useMemo(() => companies.find((c) => c.id === selectedId) || null, [companies, selectedId]);
   const intent = useMemo(() => (query ? interpretQuery(query) : null), [query]);
 
   useEffect(() => { window.scrollTo(0, 0); }, [view, selectedId]);
@@ -91,7 +92,7 @@ export default function App() {
         <div className="foot-giant" aria-hidden="true">TEXA</div>
         <div className="foot-row">
           <span>Textile Network & Marketplace</span>
-          <span>{COMPANIES.length} suppliers · Made in Italy</span>
+          <span>{companies.length} suppliers · Made in Italy</span>
         </div>
       </footer>
     </div>

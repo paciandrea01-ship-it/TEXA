@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { COMPANIES } from "../data/companies.js";
 import { CATEGORIES, INDEX_SCALE, hexToRgb } from "../data/catalog.js";
 import { CONSULTANTS } from "../data/consultants.js";
 import { FAIRS, fairStatus, sortFairs, fmtRange } from "../data/fairs.js";
+import { useCompanies } from "../state/companies.jsx";
 import { Marquee } from "./Marquee.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 import { Badge } from "./ui/Badge.jsx";
@@ -10,6 +10,7 @@ import { Badge } from "./ui/Badge.jsx";
 // Pagina iniziale (Index)
 export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
   const [q, setQ] = useState("");
+  const COMPANIES = useCompanies();
   const nextFairs = useMemo(() => sortFairs(FAIRS).filter((f) => fairStatus(f).key !== "done").slice(0, 3), []);
 
   // 9 quadranti = 8 categorie + Consulenti, colorati come scala colori

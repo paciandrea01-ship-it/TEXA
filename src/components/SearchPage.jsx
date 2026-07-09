@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { COMPANIES } from "../data/companies.js";
 import { CATEGORIES } from "../data/catalog.js";
 import { useTrends } from "../data/trends.js";
+import { useCompanies } from "../state/companies.jsx";
 import { TrendColors } from "./TrendColors.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 
 // Pagina Ricerca: introduzione + trend colori stagionali
 export function SearchPage({ onSearch, onCategory }) {
   const [q, setQ] = useState("");
+  const COMPANIES = useCompanies();
   const trends = useTrends();
   return (
     <main className="pg">

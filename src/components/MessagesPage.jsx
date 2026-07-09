@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { COMPANIES } from "../data/companies.js";
 import { CERT_LABELS } from "../data/catalog.js";
 import { companyShades } from "../data/shades.js";
 import { docsFor, download } from "../lib/docs.js";
+import { useCompanies } from "../state/companies.jsx";
 import { PaletteDots, PaletteSquares } from "./ui/Palette.jsx";
 
 export function MessagesPage({ threads, activeId, setActiveId, onSend, onStart, onOpenCompany }) {
@@ -10,6 +10,7 @@ export function MessagesPage({ threads, activeId, setActiveId, onSend, onStart, 
   const [q, setQ] = useState("");
   const [draft, setDraft] = useState("");
   const endRef = useRef(null);
+  const COMPANIES = useCompanies();
   const active = threads.find((t) => t.companyId === activeId);
   const company = COMPANIES.find((c) => c.id === activeId);
   const matches = q

@@ -9,6 +9,7 @@ await esbuild.build({
   bundle: true,
   minify: true,
   format: "iife",
+  define: { "process.env.NODE_ENV": '"production"' },
   loader: { ".jsx": "jsx", ".css": "css", ".jpg": "dataurl", ".png": "dataurl", ".webp": "dataurl" },
   outfile: "dist/app.bundle.js",
 });
