@@ -16,3 +16,4 @@ export const COMPANIES_TABLE = "companies";
 
 export const supabase =
   SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+https://jnnsufohcrrqqdelxick.supabase.co/rest/v1/
