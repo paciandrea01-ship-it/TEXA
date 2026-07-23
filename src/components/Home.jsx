@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { CATEGORIES, INDEX_SCALE, hexToRgb } from "../data/catalog.js";
-import { CONSULTANTS } from "../data/consultants.js";
 import { FAIRS, fairStatus, sortFairs, fmtRange } from "../data/fairs.js";
 import { useCompanies } from "../state/companies.jsx";
+import { matchesRole } from "../lib/search.js";
 import { Marquee } from "./Marquee.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 import { Badge } from "./ui/Badge.jsx";
@@ -12,6 +12,7 @@ export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
   const [q, setQ] = useState("");
   const COMPANIES = useCompanies();
   const nextFairs = useMemo(() => sortFairs(FAIRS).filter((f) => fairStatus(f).key !== "done").slice(0, 3), []);
+  const nConsultants = useMemo(() => COMPANIES.filter((c) => matchesRole(c, "Consulenti")).length, [COMPANIES]);
 
   // 9 quadranti = 8 categorie + Consulenti, colorati come scala colori
   const tiles = [
@@ -19,7 +20,7 @@ export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
       key: cat, label: cat, n: COMPANIES.filter((x) => x.category === cat).length,
       unit: "fornitori", cta: "Esplora ↗", onClick: () => onCategory(cat),
     })),
-    { key: "consulenti", label: "consulenti", n: CONSULTANTS.length, unit: "consulenti", cta: "Elenco ↗", onClick: onConsultants },
+    { key: "consulenti", label: "consulenti", n: nConsultants, unit: "consulenti", cta: "Elenco ↗", onClick: onConsultants },
   ];
 
   return (
@@ -47,7 +48,7 @@ export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
         <FruitBackground />
         <div className="index-head">
           <h2>Index</h2>
-          <span className="index-sub">{COMPANIES.length} fornitori · {CONSULTANTS.length} consulenti</span>
+          <span className="index-sub">{COMPANIES.length} fornitori · {nConsultants} consulenti</span>
         </div>
         <div className="cat-cards">
           {tiles.map((t, i) => {

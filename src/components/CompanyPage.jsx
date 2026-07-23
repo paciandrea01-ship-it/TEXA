@@ -1,10 +1,10 @@
 import React from "react";
 import { CERT_LABELS } from "../data/catalog.js";
-import { mockProducts } from "../lib/products.js";
-import { PaletteDots } from "./ui/Palette.jsx";
+import { useNetwork } from "../state/network.jsx";
 
 export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setContactOpen, rfqSent }) {
-  const products = mockProducts(c);
+  const net = useNetwork();
+  const rel = net.relOf(c.id);
   const initials = c.name.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   return (
     <main className="co">
@@ -15,9 +15,13 @@ export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setConta
           <span className="pill">{c.category}</span>
           <div className="co-name">
             <h1>{c.name}</h1>
-            <PaletteDots c={c} n={6} />
           </div>
           <p className="co-loc">{c.address ? c.address + ", " : ""}{c.city} {c.province && "(" + c.province + ")"} · {c.country}</p>
+          <div className="rel-btns" aria-label="Relazione">
+            <button className={"rel-btn" + (rel.follow ? " on" : "")} onClick={() => net.toggleRel(c.id, "follow", c.name)}>＋ {rel.follow ? "Seguito" : "Segui"}</button>
+            <button className={"rel-btn" + (rel.fav ? " on" : "")} onClick={() => net.toggleRel(c.id, "fav", c.name)}>★ Preferito</button>
+            <button className={"rel-btn" + (rel.todo ? " on" : "")} onClick={() => net.toggleRel(c.id, "todo", c.name)}>☐ Da contattare</button>
+          </div>
         </div>
         <div className="co-cta">
           <button className="btn primary" onClick={() => setContactOpen(!contactOpen)}>Contatta</button>
@@ -50,21 +54,6 @@ export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setConta
           <div className="tagrow">
             {c.certifications.map((cert) => (
               <span key={cert} className="cert big">{cert}<small>{CERT_LABELS[cert] || ""}</small></span>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {products.length > 0 && (
-        <section className="co-sec">
-          <h2>Prodotti</h2>
-          <div className="prods">
-            {products.map((p) => (
-              <div key={p.id} className="prod">
-                <div className="prod-swatch" style={{ background: p.swatch }} aria-hidden="true" />
-                <span className="prod-name">{p.name}</span>
-                <span className="prod-meta">MOQ {p.moq}</span>
-              </div>
             ))}
           </div>
         </section>

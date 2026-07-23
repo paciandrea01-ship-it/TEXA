@@ -23,11 +23,29 @@ export function interpretQuery(q) {
   return { category, materials, keywords };
 }
 
+// Tipologie di operatore: matching per ruolo su categoria, specialità,
+// descrizione e tag (i "Fornitori" sono tutte le aziende della rete).
+export const ROLE_HINTS = {
+  "Fornitori": null,
+  "Produttori": ["produz", "manifattur", "filatur", "tessitur", "maglifici", "lanifici", "torcitur", "tintori", "stamperi", "confezion", "fabbric"],
+  "Agenti": ["agent", "rappresentan", "trading", "distribuzion", "commercial"],
+  "Consulenti": ["consulen", "consultant", "advisor", "studio"],
+};
+
+export function matchesRole(c, role) {
+  const hints = ROLE_HINTS[role];
+  if (hints === null) return true;
+  if (!hints) return false;
+  const hay = (c.category + " " + c.speciality + " " + c.description + " " + c.tags.join(" ") + " " + c.name).toLowerCase();
+  return hints.some((h) => hay.includes(h));
+}
+
 export function searchCompanies(companies, query, activeCategory) {
   const intent = query ? interpretQuery(query) : { category: null, materials: [], keywords: [] };
   const cat = activeCategory || intent.category;
+  const isRole = cat && ROLE_HINTS[cat] !== undefined;
   return (companies || []).filter((c) => {
-    if (cat && c.category !== cat) return false;
+    if (cat && (isRole ? !matchesRole(c, cat) : c.category !== cat)) return false;
     if (!query) return true;
     const hay = (c.name + " " + c.speciality + " " + c.description + " " + c.tags.join(" ") + " " + c.city + " " + c.certifications.join(" ")).toLowerCase();
     const kws = intent.keywords;

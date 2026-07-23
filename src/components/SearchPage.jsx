@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { CATEGORIES } from "../data/catalog.js";
-import { useTrends } from "../data/trends.js";
+import { CATEGORIES, ROLE_CATEGORIES } from "../data/catalog.js";
 import { useCompanies } from "../state/companies.jsx";
-import { TrendColors } from "./TrendColors.jsx";
+import { AiAssistant } from "./AiAssistant.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 
-// Pagina Ricerca: introduzione + trend colori stagionali
-export function SearchPage({ onSearch, onCategory }) {
+// Pagina Ricerca: introduzione, categorie merceologiche + tipologie di
+// operatore (barre scorrevoli) e assistente TEXA AI colori & tendenze
+export function SearchPage({ onSearch, onCategory, onOpenCompany }) {
   const [q, setQ] = useState("");
   const COMPANIES = useCompanies();
-  const trends = useTrends();
   return (
     <main className="pg">
       <section className="pg-hero">
@@ -30,9 +29,14 @@ export function SearchPage({ onSearch, onCategory }) {
             <button key={c} className="chip" onClick={() => onCategory(c)}>{c}</button>
           ))}
         </div>
+        <div className="chips roles" aria-label="Tipologia di operatore">
+          {ROLE_CATEGORIES.map((c) => (
+            <button key={c} className="chip soft" onClick={() => onCategory(c)}>{c}</button>
+          ))}
+        </div>
       </section>
 
-      <TrendColors trends={trends} />
+      <AiAssistant onSearch={onSearch} onOpenCompany={onOpenCompany} />
     </main>
   );
 }
