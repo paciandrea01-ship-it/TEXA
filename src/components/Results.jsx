@@ -1,11 +1,12 @@
 import React from "react";
-import { CATEGORIES, CERT_LABELS } from "../data/catalog.js";
+import { CATEGORIES, ROLE_CATEGORIES, CERT_LABELS } from "../data/catalog.js";
+import { relatedSearches } from "../lib/ai.js";
 import { inItaly } from "../lib/mapGeo.js";
-import { PaletteDots } from "./ui/Palette.jsx";
 import { LiveMap } from "./LiveMap.jsx";
 
-export function Results({ input, setInput, onSubmit, results, intent, activeCategory, setActiveCategory, hoveredId, setHoveredId, onOpen }) {
+export function Results({ input, setInput, onSubmit, onSearch, results, intent, activeCategory, setActiveCategory, hoveredId, setHoveredId, onOpen }) {
   const abroad = results.filter((c) => !inItaly(c));
+  const related = relatedSearches(intent);
   return (
     <main className="res">
       <form className="searchbar compact" onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
@@ -19,11 +20,25 @@ export function Results({ input, setInput, onSubmit, results, intent, activeCate
           <button key={c} className={"chip" + (activeCategory === c ? " on" : "")} onClick={() => setActiveCategory(activeCategory === c ? null : c)}>{c}</button>
         ))}
       </div>
+      <div className="chips roles" role="tablist" aria-label="Tipologia di operatore">
+        {ROLE_CATEGORIES.map((c) => (
+          <button key={c} className={"chip soft" + (activeCategory === c ? " on" : "")} onClick={() => setActiveCategory(activeCategory === c ? null : c)}>{c}</button>
+        ))}
+      </div>
 
       {intent && (intent.category || intent.materials.length > 0) && (
         <p className="ai-note">
           <span className="ai-dot" aria-hidden="true" />
           Ricerca interpretata{intent.materials.length > 0 && <> — materiali: <strong>{intent.materials.join(", ")}</strong></>}{intent.category && !activeCategory && <> — categoria: <strong>{intent.category}</strong></>}
+        </p>
+      )}
+      {related.length > 0 && (
+        <p className="ai-note">
+          <span className="ai-dot" aria-hidden="true" />
+          TEXA AI suggerisce anche:&nbsp;
+          {related.map((r) => (
+            <button key={r} className="hint-link sm" onClick={() => onSearch(r)}>{r}</button>
+          ))}
         </p>
       )}
 
@@ -44,7 +59,6 @@ export function Results({ input, setInput, onSubmit, results, intent, activeCate
               onKeyDown={(e) => e.key === "Enter" && onOpen(c.id)}>
               <div className="card-top">
                 <h3>{c.name}</h3>
-                <PaletteDots c={c} n={4} />
                 <span className="card-arrow" aria-hidden="true">↗</span>
               </div>
               <p className="card-desc">{c.description}</p>

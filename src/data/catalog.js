@@ -25,6 +25,10 @@ export const CATEGORIES = [
   "Macchinari",
 ];
 
+// Tipologie di operatore (barra scorrevole della Ricerca, sotto le
+// categorie merceologiche). Filtrano per ruolo, non per merceologia.
+export const ROLE_CATEGORIES = ["Fornitori", "Produttori", "Agenti", "Consulenti"];
+
 export const CATEGORY_SHADES = {
   "Filati": { bg: "#0A4733", fg: "#CDE97B" },
   "Tessuti": { bg: "#22335F", fg: "#C9D8F4" },

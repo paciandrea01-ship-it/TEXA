@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase, COMPANIES_TABLE } from "../config/supabase.js";
-import { COMPANIES as FALLBACK } from "../data/companies.js";
 import { coordsFor } from "../lib/geo.js";
 
 // Normalizza gli array che Supabase può restituire come jsonb, array
@@ -46,26 +45,19 @@ function mapRow(r) {
   };
 }
 
-const Ctx = createContext({ companies: FALLBACK, loading: false, error: null, source: "local" });
+// Unica sorgente dati: il database Supabase. Nessun dato locale o mock.
+const Ctx = createContext({ companies: [], loading: true, error: null });
 
 export function CompaniesProvider({ children }) {
-  const [state, setState] = useState({
-    companies: FALLBACK, loading: !!supabase, error: null, source: supabase ? "supabase" : "local",
-  });
+  const [state, setState] = useState({ companies: [], loading: !!supabase, error: supabase ? null : "Supabase non configurato." });
 
   useEffect(() => {
     if (!supabase) return;
     let dead = false;
     supabase.from(COMPANIES_TABLE).select("*").then(({ data, error }) => {
       if (dead) return;
-      // Se Supabase risponde con errore o con tabella vuota, resta il
-      // fallback locale (il sito funziona comunque). Quando la tabella
-      // avrà i dati, questi prendono automaticamente il sopravvento.
-      if (error || !data || data.length === 0) {
-        setState({ companies: FALLBACK, loading: false, error: error ? error.message : null, source: "local" });
-        return;
-      }
-      setState({ companies: data.map(mapRow), loading: false, error: null, source: "supabase" });
+      if (error) { setState({ companies: [], loading: false, error: error.message }); return; }
+      setState({ companies: (data || []).map(mapRow), loading: false, error: null });
     });
     return () => { dead = true; };
   }, []);
