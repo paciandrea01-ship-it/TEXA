@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MAP, px, py, ITALY, SICILY, SARDINIA, toPath } from "../lib/mapGeo.js";
+import { MAP, px, py, inItaly, ITALY, SICILY, SARDINIA, toPath } from "../lib/mapGeo.js";
 
 export function LiveMap({ companies, hoveredId, setHoveredId, onOpen }) {
   const boxRef = useRef(null);
@@ -78,13 +78,16 @@ export function LiveMap({ companies, hoveredId, setHoveredId, onOpen }) {
 }
 
 function FallbackMap({ companies, hoveredId, setHoveredId, onOpen }) {
+  // La mappa di riserva è un disegno della sola Italia: mostra i pin
+  // italiani; le estere restano nell'elenco "partner esteri" sotto.
+  const italiane = companies.filter(inItaly);
   return (
     <div className="mapwrap">
-      <svg viewBox={"0 0 " + MAP.w + " " + MAP.h} className="svgmap" role="img" aria-label={"Mappa con " + companies.length + " aziende"}>
+      <svg viewBox={"0 0 " + MAP.w + " " + MAP.h} className="svgmap" role="img" aria-label={"Mappa con " + italiane.length + " aziende in Italia"}>
         <path d={toPath(ITALY)} fill="#F2F3F0" stroke="#E1E3DE" strokeWidth="1.2" strokeLinejoin="round" />
         <path d={toPath(SICILY)} fill="#F2F3F0" stroke="#E1E3DE" strokeWidth="1.2" />
         <path d={toPath(SARDINIA)} fill="#F2F3F0" stroke="#E1E3DE" strokeWidth="1.2" />
-        {companies.map((c) => {
+        {italiane.map((c) => {
           const on = hoveredId === c.id;
           return (
             <g key={c.id} className="pin" transform={"translate(" + px(c.lng).toFixed(1) + "," + py(c.lat).toFixed(1) + ")"}
