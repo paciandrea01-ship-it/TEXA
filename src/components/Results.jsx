@@ -13,7 +13,9 @@ const locLabel = (c) => isItalyCountry(c)
   : (c.city ? c.city + " · " : "") + c.country;
 
 export function Results({ input, setInput, onSubmit, onSearch, results, intent, activeCategory, setActiveCategory, hoveredId, setHoveredId, onOpen }) {
+  const italiane = results.filter(inItaly);
   const abroad = results.filter((c) => !inItaly(c));
+  const paesiEstero = [...new Set(abroad.map((c) => c.country).filter(Boolean))];
   const related = relatedSearches(intent);
   const CATEGORIES = useCategories();
   return (
@@ -82,8 +84,10 @@ export function Results({ input, setInput, onSubmit, onSearch, results, intent, 
         </div>
 
         <aside className="res-map">
-          <LiveMap companies={results.filter(inItaly)} hoveredId={hoveredId} setHoveredId={setHoveredId} onOpen={onOpen} />
-          {abroad.length > 0 && <p className="abroad">+{abroad.length} partner ester{abroad.length === 1 ? "o" : "i"} ({[...new Set(abroad.map((c) => c.country).filter(Boolean))].join(", ")})</p>}
+          <LiveMap companies={results} hoveredId={hoveredId} setHoveredId={setHoveredId} onOpen={onOpen} />
+          {abroad.length > 0 && (
+            <p className="abroad">{italiane.length} in Italia · {abroad.length} all'estero{paesiEstero.length > 0 ? " (" + paesiEstero.join(", ") + ")" : ""}</p>
+          )}
         </aside>
       </div>
     </main>
