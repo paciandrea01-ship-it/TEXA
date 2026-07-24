@@ -16,31 +16,40 @@ const arr = (v) => {
   return [];
 };
 
-// Riga Supabase → oggetto Company usato dall'app (snake_case → camelCase)
+// Certificazioni note, estratte dal testo della descrizione quando la
+// tabella non ha una colonna dedicata.
+const KNOWN_CERTS = ["GOTS", "GRS", "RWS", "RMS", "OEKO-TEX", "ISO 9001", "BCI"];
+const certsFromText = (t) => KNOWN_CERTS.filter((c) => (t || "").toUpperCase().includes(c));
+
+// Riga Supabase → oggetto Company usato dall'app. Accetta sia i nomi
+// colonna "storici" (name, category, city…) sia quelli del CSV
+// fornitori (supplier_name, categoria, citta, sigla…), così la tabella
+// si può importare in Supabase direttamente dal file, senza rinominare.
 function mapRow(r) {
-  const name = r.name || "";
-  const province = r.province || "";
+  const name = r.name || r.supplier_name || "";
+  const province = r.province || r.sigla || "";
+  const description = r.description || r.descrizione || "";
   const hasCoords = r.lat != null && r.lng != null;
   const { lat, lng } = hasCoords ? { lat: Number(r.lat), lng: Number(r.lng) } : coordsFor(name, province);
   return {
     id: r.id != null ? String(r.id) : "c" + Math.random().toString(36).slice(2, 10),
     name,
-    category: r.category || "",
-    speciality: r.speciality || "",
-    description: r.description || "",
-    tags: arr(r.tags),
-    certifications: arr(r.certifications),
-    vat: r.vat || "",
+    category: r.category || r.categoria || "",
+    speciality: r.speciality || r.sottocategoria || r.speciality_originale || "",
+    description,
+    tags: arr(r.tags).length > 0 ? arr(r.tags) : description.split(",").map((x) => x.trim()).filter(Boolean).slice(0, 8),
+    certifications: arr(r.certifications).length > 0 ? arr(r.certifications) : certsFromText(description),
+    vat: r.vat || r.piva || "",
     ateco: r.ateco || "",
-    country: r.country || "ITALIA",
-    city: r.city || "",
+    country: r.country || r.paese || "ITALIA",
+    city: r.city || r.citta || "",
     province,
-    address: r.address || "",
-    contactPerson: r.contactPerson || r.contact_person || "",
-    website: r.website || "",
-    emails: arr(r.emails),
+    address: r.address || r.indirizzo || "",
+    contactPerson: r.contactPerson || r.contact_person || r.referente || "",
+    website: r.website || r.sito || "",
+    emails: arr(r.emails).length > 0 ? arr(r.emails) : arr(r.email),
     pec: r.pec || "",
-    phone: r.phone || "",
+    phone: r.phone || r.telefono || "",
     lat, lng,
   };
 }
