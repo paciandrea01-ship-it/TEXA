@@ -6,6 +6,12 @@ import { useCategories } from "../state/companies.jsx";
 import { PaletteDots } from "./ui/Palette.jsx";
 import { LiveMap } from "./LiveMap.jsx";
 
+const isItalyCountry = (c) => { const k = (c.country || "").trim().toLowerCase(); return !k || k === "italia" || k === "italy"; };
+// Etichetta luogo: per l'Italia città (provincia); per l'estero città · Paese
+const locLabel = (c) => isItalyCountry(c)
+  ? c.city + (c.province ? " (" + c.province + ")" : "")
+  : (c.city ? c.city + " · " : "") + c.country;
+
 export function Results({ input, setInput, onSubmit, onSearch, results, intent, activeCategory, setActiveCategory, hoveredId, setHoveredId, onOpen }) {
   const abroad = results.filter((c) => !inItaly(c));
   const related = relatedSearches(intent);
@@ -68,7 +74,7 @@ export function Results({ input, setInput, onSubmit, onSearch, results, intent, 
               <p className="card-desc">{c.description}</p>
               <div className="card-meta">
                 <span className="pill">{c.category}</span>
-                <span className="loc">{c.city}{c.province === "PL" ? " · PL" : c.province ? " (" + c.province + ")" : ""}</span>
+                <span className="loc">{locLabel(c)}</span>
                 {c.certifications.map((cert) => <span key={cert} className="cert" title={CERT_LABELS[cert] || cert}>{cert}</span>)}
               </div>
             </article>
@@ -77,7 +83,7 @@ export function Results({ input, setInput, onSubmit, onSearch, results, intent, 
 
         <aside className="res-map">
           <LiveMap companies={results.filter(inItaly)} hoveredId={hoveredId} setHoveredId={setHoveredId} onOpen={onOpen} />
-          {abroad.length > 0 && <p className="abroad">+{abroad.length} partner estero ({abroad.map((c) => c.city).join(", ")})</p>}
+          {abroad.length > 0 && <p className="abroad">+{abroad.length} partner ester{abroad.length === 1 ? "o" : "i"} ({[...new Set(abroad.map((c) => c.country).filter(Boolean))].join(", ")})</p>}
         </aside>
       </div>
     </main>

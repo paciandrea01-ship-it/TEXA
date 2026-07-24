@@ -28,9 +28,14 @@ const certsFromText = (t) => KNOWN_CERTS.filter((c) => (t || "").toUpperCase().i
 function mapRow(r) {
   const name = r.name || r.supplier_name || "";
   const province = r.province || r.sigla || "";
+  const country = r.country || r.paese || "ITALIA";
+  const city = r.city || r.citta || "";
+  const region = r.provincia || r.region || "";
   const description = r.description || r.descrizione || "";
   const hasCoords = r.lat != null && r.lng != null;
-  const { lat, lng } = hasCoords ? { lat: Number(r.lat), lng: Number(r.lng) } : coordsFor(name, province);
+  const { lat, lng } = hasCoords
+    ? { lat: Number(r.lat), lng: Number(r.lng) }
+    : coordsFor(name, { province, country, region, city });
   return {
     id: r.id != null ? String(r.id) : "c" + Math.random().toString(36).slice(2, 10),
     name,
