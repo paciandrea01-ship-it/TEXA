@@ -3,6 +3,8 @@ import { CERT_LABELS } from "../data/catalog.js";
 import { useCompanies } from "../state/companies.jsx";
 import { useNetwork, fmtWhen } from "../state/network.jsx";
 import { suggestContacts } from "../lib/ai.js";
+import { docsFor, download } from "../lib/docs.js";
+import { PaletteSquares } from "./ui/Palette.jsx";
 
 // Rubrica professionale B2B: contatti salvati (seguiti, preferiti,
 // da contattare), conversazioni e storico interazioni per fornitore.
@@ -146,6 +148,7 @@ export function MessagesPage({ activeId, setActiveId, onOpenCompany }) {
                 <button className={tab === "chat" ? "on" : ""} onClick={() => setTab("chat")}>Conversazione</button>
                 <button className={tab === "storico" ? "on" : ""} onClick={() => setTab("storico")}>Storico</button>
                 <button className={tab === "profilo" ? "on" : ""} onClick={() => setTab("profilo")}>Profilo</button>
+                <button className={tab === "documenti" ? "on" : ""} onClick={() => setTab("documenti")}>Certificazioni & Doc</button>
               </div>
             </div>
 
@@ -209,7 +212,33 @@ export function MessagesPage({ activeId, setActiveId, onOpenCompany }) {
                     ))}
                   </div>
                 )}
+                <PaletteSquares c={company} />
                 <button className="btn" onClick={() => onOpenCompany(company.id)}>Scheda completa →</button>
+              </div>
+            )}
+
+            {tab === "documenti" && (
+              <div className="msg-panel">
+                <h3 className="msg-h3">Certificazioni</h3>
+                {company.certifications.length > 0 ? (
+                  <div className="tagrow">
+                    {company.certifications.map((cert) => (
+                      <span key={cert} className="cert big">{cert}<small>{CERT_LABELS[cert] || ""}</small></span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="msg-note">Nessuna certificazione registrata su TEXA per questo fornitore. Richiedile in conversazione: GOTS, OEKO-TEX, GRS, ISO…</p>
+                )}
+                <h3 className="msg-h3">Documentazione scaricabile</h3>
+                <div className="docs">
+                  {docsFor(company).map((d) => (
+                    <button key={d.id} className="doc" onClick={() => download(d.file, d.make())}>
+                      <span className="doc-ic" aria-hidden="true">↓</span>
+                      <span className="doc-name">{d.label}</span>
+                      <span className="doc-type">{d.type}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </section>

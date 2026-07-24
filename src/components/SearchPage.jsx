@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { CATEGORIES, ROLE_CATEGORIES } from "../data/catalog.js";
-import { useCompanies } from "../state/companies.jsx";
+import { ROLE_CATEGORIES } from "../data/catalog.js";
+import { useCompanies, useCategories } from "../state/companies.jsx";
 import { AiAssistant } from "./AiAssistant.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 
@@ -9,6 +9,7 @@ import { FruitBackground } from "./FruitBackground.jsx";
 export function SearchPage({ onSearch, onCategory, onOpenCompany }) {
   const [q, setQ] = useState("");
   const COMPANIES = useCompanies();
+  const CATEGORIES = useCategories();
   return (
     <main className="pg">
       <section className="pg-hero">

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase, COMPANIES_TABLE } from "../config/supabase.js";
 import { coordsFor } from "../lib/geo.js";
 
@@ -76,3 +76,14 @@ export function CompaniesProvider({ children }) {
 
 export const useCompanies = () => useContext(Ctx).companies;
 export const useCompaniesState = () => useContext(Ctx);
+
+// Categorie reali presenti nel database (ordinate per numerosità):
+// i riquadri e i filtri si adattano a qualunque categoria usata su Supabase.
+export function useCategories() {
+  const companies = useCompanies();
+  return useMemo(() => {
+    const n = {};
+    companies.forEach((c) => { if (c.category) n[c.category] = (n[c.category] || 0) + 1; });
+    return Object.keys(n).sort((a, b) => n[b] - n[a]);
+  }, [companies]);
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import { CERT_LABELS } from "../data/catalog.js";
 import { useNetwork } from "../state/network.jsx";
+import { PaletteDots, PaletteSquares } from "./ui/Palette.jsx";
 
 export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setContactOpen, rfqSent }) {
   const net = useNetwork();
@@ -15,6 +16,7 @@ export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setConta
           <span className="pill">{c.category}</span>
           <div className="co-name">
             <h1>{c.name}</h1>
+            <PaletteDots c={c} n={6} />
           </div>
           <p className="co-loc">{c.address ? c.address + ", " : ""}{c.city} {c.province && "(" + c.province + ")"} · {c.country}</p>
           <div className="rel-btns" aria-label="Relazione">
@@ -58,6 +60,12 @@ export function CompanyPage({ c, onBack, onRfq, onMessage, contactOpen, setConta
           </div>
         </section>
       )}
+
+      <section className="co-sec">
+        <h2>Cartella colori</h2>
+        <PaletteSquares c={c} />
+        <p className="fnote">Palette indicativa della categoria — richiedi al fornitore la cartella colori ufficiale.</p>
+      </section>
     </main>
   );
 }

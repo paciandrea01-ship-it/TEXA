@@ -7,14 +7,21 @@
 import { TREND_SEASONS, seasonOrder, seasonKey } from "../data/trends.js";
 import { searchCompanies } from "./search.js";
 
+// Le "cats" sono parole chiave confrontate in modo tollerante con la
+// categoria reale della tabella Supabase (es. "Produzione", "Serigrafia").
 export const MARKETS = [
   { key: "tutti", label: "Tutti i mercati", hint: "", cats: [] },
   { key: "maglieria", label: "Maglieria", hint: "filati per maglieria", cats: ["Filati"] },
-  { key: "tessuti", label: "Tessuti & Abbigliamento", hint: "tessuti", cats: ["Tessuti", "Abbigliamento & Intimo"] },
-  { key: "sport", label: "Sport & Tech", hint: "tessuti tecnici performance", cats: ["Tessuti", "Calze & Calzetteria"] },
-  { key: "intimo", label: "Intimo & Beachwear", hint: "intimo seamless beachwear", cats: ["Abbigliamento & Intimo", "Calze & Calzetteria"] },
-  { key: "stampa", label: "Stampa & Ricamo", hint: "stampa ricamo", cats: ["Stampa & Ricamo"] },
+  { key: "tessuti", label: "Tessuti & Abbigliamento", hint: "tessuti", cats: ["Tessuti", "Abbigliamento"] },
+  { key: "sport", label: "Sport & Tech", hint: "tessuti tecnici performance sport", cats: ["Tessuti", "Produzione", "Calze"] },
+  { key: "intimo", label: "Intimo & Beachwear", hint: "intimo seamless beachwear calze", cats: ["Produzione", "Confezioni", "Calze", "Abbigliamento"] },
+  { key: "stampa", label: "Stampa & Ricamo", hint: "stampa ricamo serigrafia", cats: ["Serigrafia", "Stampa", "Tipografia"] },
 ];
+
+const inCats = (c, cats) => {
+  const cat = (c.category || "").toLowerCase();
+  return !!cat && cats.some((k) => cat.includes(k.toLowerCase()) || k.toLowerCase().includes(cat));
+};
 
 const prevKeys = (key) => {
   const keys = seasonOrder();
@@ -69,8 +76,8 @@ export function marketAdvice(marketKey, season) {
 // Fornitori pertinenti per mercato/stagione, presi dal database reale.
 export function suggestSuppliers(companies, marketKey, limit = 4) {
   const m = MARKETS.find((x) => x.key === marketKey);
-  if (!m || m.cats.length === 0) return (companies || []).slice(0, 0);
-  const pool = (companies || []).filter((c) => m.cats.includes(c.category));
+  if (!m || m.cats.length === 0) return [];
+  const pool = (companies || []).filter((c) => inCats(c, m.cats));
   const scored = m.hint ? searchCompanies(pool, m.hint, null) : pool;
   return (scored.length > 0 ? scored : pool).slice(0, limit);
 }
