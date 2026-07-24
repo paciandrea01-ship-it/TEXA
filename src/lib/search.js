@@ -44,8 +44,11 @@ export function searchCompanies(companies, query, activeCategory) {
   const intent = query ? interpretQuery(query) : { category: null, materials: [], keywords: [] };
   const cat = activeCategory || intent.category;
   const isRole = cat && ROLE_HINTS[cat] !== undefined;
+  // Applica il filtro categoria solo se esiste davvero nel database
+  // (le categorie ora sono libere: arrivano dalla tabella Supabase).
+  const catExists = !cat || isRole || (companies || []).some((c) => c.category === cat);
   return (companies || []).filter((c) => {
-    if (cat && (isRole ? !matchesRole(c, cat) : c.category !== cat)) return false;
+    if (cat && catExists && (isRole ? !matchesRole(c, cat) : c.category !== cat)) return false;
     if (!query) return true;
     const hay = (c.name + " " + c.speciality + " " + c.description + " " + c.tags.join(" ") + " " + c.city + " " + c.certifications.join(" ")).toLowerCase();
     const kws = intent.keywords;

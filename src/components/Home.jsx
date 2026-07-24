@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { CATEGORIES, INDEX_SCALE, hexToRgb } from "../data/catalog.js";
+import { INDEX_SCALE, hexToRgb } from "../data/catalog.js";
 import { FAIRS, fairStatus, sortFairs, fmtRange } from "../data/fairs.js";
-import { useCompanies } from "../state/companies.jsx";
-import { matchesRole } from "../lib/search.js";
+import { useCompanies, useCategories } from "../state/companies.jsx";
+import { isConsulenteOrAgente } from "./ConsultantsPage.jsx";
 import { Marquee } from "./Marquee.jsx";
 import { FruitBackground } from "./FruitBackground.jsx";
 import { Badge } from "./ui/Badge.jsx";
@@ -12,15 +12,19 @@ export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
   const [q, setQ] = useState("");
   const COMPANIES = useCompanies();
   const nextFairs = useMemo(() => sortFairs(FAIRS).filter((f) => fairStatus(f).key !== "done").slice(0, 3), []);
-  const nConsultants = useMemo(() => COMPANIES.filter((c) => matchesRole(c, "Consulenti")).length, [COMPANIES]);
+  const nConsulentiAgenti = useMemo(() => COMPANIES.filter(isConsulenteOrAgente).length, [COMPANIES]);
+  // Categorie reali del database ("Agenti" confluisce nel riquadro
+  // dedicato Consulenti & Agenti)
+  const CATEGORIES = useCategories().filter((c) => c !== "Agenti" && c !== "Consulenti");
 
-  // 9 quadranti = 8 categorie + Consulenti, colorati come scala colori
+  // Quadranti = tutte le categorie del database + Consulenti & Agenti,
+  // colorati ciclando la scala colori dell'Index
   const tiles = [
     ...CATEGORIES.map((cat) => ({
       key: cat, label: cat, n: COMPANIES.filter((x) => x.category === cat).length,
       unit: "fornitori", cta: "Esplora ↗", onClick: () => onCategory(cat),
     })),
-    { key: "consulenti", label: "consulenti", n: nConsultants, unit: "consulenti", cta: "Elenco ↗", onClick: onConsultants },
+    { key: "consulenti", label: "consulenti & agenti", n: nConsulentiAgenti, unit: "professionisti", cta: "Elenco ↗", onClick: onConsultants },
   ];
 
   return (
@@ -48,11 +52,11 @@ export function Home({ onSearch, onCategory, onFairs, onConsultants }) {
         <FruitBackground />
         <div className="index-head">
           <h2>Index</h2>
-          <span className="index-sub">{COMPANIES.length} fornitori · {nConsultants} consulenti</span>
+          <span className="index-sub">{COMPANIES.length} fornitori · {nConsulentiAgenti} consulenti & agenti</span>
         </div>
         <div className="cat-cards">
           {tiles.map((t, i) => {
-            const sh = INDEX_SCALE[i] || { bg: "#F2F3F0", fg: "#141414" };
+            const sh = INDEX_SCALE[i % INDEX_SCALE.length];
             return (
               <button key={t.key} className="cat-card" style={{ background: sh.bg, color: sh.fg }} onClick={t.onClick}>
                 <span className="cat-name">{t.label.toLowerCase()}</span>

@@ -1,12 +1,15 @@
 import React from "react";
-import { CATEGORIES, ROLE_CATEGORIES, CERT_LABELS } from "../data/catalog.js";
+import { ROLE_CATEGORIES, CERT_LABELS } from "../data/catalog.js";
 import { relatedSearches } from "../lib/ai.js";
 import { inItaly } from "../lib/mapGeo.js";
+import { useCategories } from "../state/companies.jsx";
+import { PaletteDots } from "./ui/Palette.jsx";
 import { LiveMap } from "./LiveMap.jsx";
 
 export function Results({ input, setInput, onSubmit, onSearch, results, intent, activeCategory, setActiveCategory, hoveredId, setHoveredId, onOpen }) {
   const abroad = results.filter((c) => !inItaly(c));
   const related = relatedSearches(intent);
+  const CATEGORIES = useCategories();
   return (
     <main className="res">
       <form className="searchbar compact" onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
@@ -59,6 +62,7 @@ export function Results({ input, setInput, onSubmit, onSearch, results, intent, 
               onKeyDown={(e) => e.key === "Enter" && onOpen(c.id)}>
               <div className="card-top">
                 <h3>{c.name}</h3>
+                <PaletteDots c={c} n={4} />
                 <span className="card-arrow" aria-hidden="true">↗</span>
               </div>
               <p className="card-desc">{c.description}</p>
