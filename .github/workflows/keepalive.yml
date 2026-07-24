@@ -1,0 +1,23 @@
+# Tiene attivo il progetto Supabase (piano Free): una micro-richiesta
+# ogni 2 giorni evita la pausa automatica per inattività (~7 giorni).
+# Usa l'URL e la Publishable key già pubblici nel frontend.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "0 9 */2 * *" # ogni 2 giorni alle 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          KEY="sb_publishable_em6fU7Y8Jc9OIMGeK6_6xA_x4OqCoIx"
+          URL="https://jnnsufohcrrqqdelxick.supabase.co/rest/v1/companies?select=id&limit=1"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$URL")
+          echo "Supabase ha risposto: HTTP $STATUS"
+          # 200 = attivo; qualsiasi altra risposta fa fallire il job così
+          # arriva la notifica email di GitHub e si può fare Restore a mano.
+          [ "$STATUS" = "200" ]
