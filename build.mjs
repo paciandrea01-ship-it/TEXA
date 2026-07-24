@@ -14,17 +14,21 @@ await esbuild.build({
   outfile: "dist/app.bundle.js",
 });
 
+// Cache-busting: il numero di versione cambia a ogni build, così il
+// browser scarica sempre il bundle nuovo dopo un deploy.
+const v = Date.now().toString(36);
+
 writeFileSync("dist/index.html", `<!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TEXA — Textile Network & Marketplace</title>
-<link rel="stylesheet" href="app.bundle.css">
+<link rel="stylesheet" href="app.bundle.css?v=${v}">
 </head>
 <body>
 <div id="root"></div>
-<script src="app.bundle.js"></script>
+<script src="app.bundle.js?v=${v}"></script>
 </body>
 </html>
 `);
